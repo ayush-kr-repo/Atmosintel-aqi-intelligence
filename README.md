@@ -1,291 +1,183 @@
-# AtmosIntel – Hyper‑Local AQI Intelligence Platform
+# AtmosIntel - Hyper-Local AQI Intelligence Platform
 
-## Overview
-**AtmosIntel** is a hyper‑local air quality intelligence system designed to convert sparse monitoring station data into **ward‑level pollution insights**. The platform uses spatial interpolation and environmental analytics to generate **real‑time pollution heatmaps**, identify high‑risk zones, and produce automated advisories for citizens and government authorities.
+AtmosIntel converts sparse air-quality monitoring data into ward-level pollution intelligence using spatial interpolation and geospatial analytics.
 
-The goal is to enable **data‑driven urban pollution management** by transforming raw air quality data into actionable intelligence.
+The platform estimates AQI for unsampled Delhi wards, detects pollution hotspots, generates citizen/government advisories, and exports an interactive Folium dashboard.
 
----
+## Project Scale
 
-# 🚨 Problem Statement
+- Processed 11,233 AQI records from 47 Delhi monitoring stations.
+- Mapped pollution estimates across 251 administrative wards.
+- Used Inverse Distance Weighting (IDW) interpolation with SciPy cKDTree nearest-neighbor search.
+- Generated ward-level AQI estimates, hotspot rankings, citizen advisories, and mitigation recommendations.
+- Automated AQI data collection through GitHub Actions using the WAQI API.
 
-Urban air quality monitoring relies on a **limited number of monitoring stations**, which often represent large geographic regions. This creates blind spots where localized pollution sources remain undetected.
+## Problem
 
-For example:
+Urban air-quality monitoring relies on a limited number of monitoring stations. Delhi has around 47 monitoring stations but more than 250 administrative wards, creating blind spots where localized pollution can go undetected.
 
-- Delhi has **~47 monitoring stations**
-- But contains **250+ administrative wards**
+This makes it harder for authorities to identify high-risk zones, issue hyper-local health advisories, and prioritize mitigation resources.
 
-Because of this limitation, authorities struggle to:
+## Solution
 
-- Detect **localized pollution hotspots**
-- Identify **pollution sources early**
-- Issue **hyper-local health advisories**
-- Deploy **mitigation resources efficiently**
+AtmosIntel generates a continuous air-quality surface from sparse station readings and aggregates the estimated AQI values at ward level.
 
-This results in **reactive pollution management instead of proactive environmental control**. 
+Pipeline:
 
----
+1. Collect AQI readings from monitoring stations.
+2. Estimate AQI at unsampled locations using IDW interpolation.
+3. Use SciPy cKDTree to optimize nearest-neighbor spatial lookup.
+4. Aggregate interpolated AQI values across ward polygons.
+5. Rank high-risk wards.
+6. Generate citizen advisories and government mitigation recommendations.
+7. Export an interactive Folium dashboard.
 
-# 💡 Proposed Solution
+## Technical Approach
 
-AtmosIntel addresses this problem by generating a **continuous air‑quality surface across the city** using spatial interpolation techniques.
+### Inverse Distance Weighting
 
-The system pipeline works as follows: 
+IDW estimates AQI at an unknown location by weighting nearby stations more heavily than distant stations.
 
-1. Collect **real-time AQI measurements** from monitoring stations  
-2. Use **Inverse Distance Weighting (IDW) interpolation** to estimate pollution levels at unsampled locations  
-3. Optimize spatial queries using **KDTree nearest-neighbor search**  
-4. Generate a **city-wide pollution surface**
-5. Aggregate pollution values at the **administrative ward level**
-6. Detect **high-risk pollution zones**
-7. Generate **automated citizen advisories and mitigation recommendations**
-8. Display results on an **interactive geospatial dashboard**
-
----
-
-# 🧠 Core Technical Idea
-
-### Inverse Distance Weighting (IDW)
-
-IDW is a spatial interpolation technique that estimates pollution levels at unknown locations by **weighting nearby monitoring stations inversely to their distance**.
-
-Points closer to a monitoring station influence the prediction more than distant stations.
-
-Mathematically:
-AQI(x) = Σ (AQI_i / d_i^p) / Σ (1 / d_i^p)
-
+```text
+AQI(x) = sum(AQI_i / d_i^p) / sum(1 / d_i^p)
+```
 Where:
 
-- `AQI_i` = AQI value of station i  
-- `d_i` = distance to station i  
-- `p` = power parameter controlling influence decay  
-
----
+- `AQI_i` is the AQI value at station `i`.
+- `d_i` is the distance from the unknown location to station `i`.
+- `p` controls how quickly influence decreases with distance.
 
 ### KDTree Optimization
 
-Spatial interpolation requires frequent **nearest-neighbor searches**.
+Spatial interpolation requires repeated nearest-neighbor lookups. AtmosIntel uses `scipy.spatial.cKDTree` to speed up station lookup and make interpolation practical across hundreds of ward/grid locations.
 
-Using **KDTree spatial indexing** from SciPy significantly improves performance by reducing search complexity from:
-O(n²) → approximately O(n log n)
+## Features
 
-This enables **fast interpolation across hundreds of ward locations**.
+- Hyper-local AQI surface generation.
+- Ward-level AQI estimation.
+- Pollution hotspot ranking.
+- Citizen health advisories.
+- Government mitigation recommendations.
+- Interactive Folium dashboard.
+- Scheduled AQI data collection with GitHub Actions.
 
-# ✨ Key Features
+## Project Preview
 
-## 1️⃣ Hyper-Local AQI Mapping
-Transforms sparse station data into a **continuous pollution heatmap across the entire city**.
+Dashboard screenshots will be added after upload.
 
----
+## Repository Structure
 
-## 2️⃣ Ward-Level Air Quality Intelligence
-Estimates AQI values for **each administrative ward**, enabling localized environmental insights.
-
----
-
-## 3️⃣ Pollution Hotspot Detection
-Automatically identifies the **most polluted wards requiring immediate attention**.
-
----
-
-## 4️⃣ Automated Citizen Advisories
-
-The system generates **health recommendations** such as:
-
-- Wear protective masks
-- Avoid outdoor physical activity
-- Limit exposure for vulnerable populations
-
----
-
-## 5️⃣ Government Mitigation Recommendations
-
-AtmosIntel suggests possible mitigation actions such as:
-
-- Deploy **dust suppression vehicles**
-- Inspect **construction zones**
-- Investigate **local pollution sources**
-- Increase **environmental monitoring**
-
----
-
-## 6️⃣ Priority Action List
-
-The system produces a ranked list of **top polluted wards** to help authorities **prioritize interventions efficiently**.
-
----
-
-**--> System Architecture**
-
-```
-AQI Monitoring Stations
-        ↓
-Real‑Time Data Collection (GitHub Dataset)
-        ↓
-Spatial Interpolation Model (IDW + KDTree)
-        ↓
-City‑Wide Pollution Surface
-        ↓
-Ward‑Level AQI Aggregation
-        ↓
-Advisory & Decision Engine
-        ↓
-Interactive Monitoring Dashboard
+```text
+atmosintel-aqi-intelligence/
+├── .github/workflows/
+│   └── aqi.yml
+├── data/
+│   ├── aqi_data.csv
+│   └── delhi_wards.geojson
+├── notebooks/
+│   └── AtmosIntel_MVP.ipynb
+├── outputs/
+│   └── AtmosIntel_dashboard.html
+├── src/
+│   └── fetch_aqi.py
+├── .env.example
+├── .gitignore
+├── README.md
+└── requirements.txt
 ```
 
----
+## Tech Stack
 
-# 🛠 Technology Stack
-
-| Component | Technology |
-|--------|--------|
-| Programming Language | Python |
+| Area | Tools |
+|---|---|
+| Language | Python |
 | Data Processing | Pandas, NumPy |
 | Geospatial Analysis | GeoPandas, Shapely |
-| Spatial Modeling | SciPy KDTree, IDW Interpolation |
+| Spatial Modeling | SciPy cKDTree, IDW interpolation |
 | Visualization | Folium |
-| Data Pipeline | GitHub Actions |
-| Development Environment | Google Colab |
+| Automation | GitHub Actions |
+| Notebook Environment | Google Colab / Jupyter |
 
----
-
-# 📊 Dashboard Preview
-*(Screenshots will be inserted here)*
-
-### AQI Heatmap
-
-
-### Ward-Level Pollution Visualization
-
-
-### Monitoring Station Map
-
----
-** --> Repository Structure**
-
-```
-delhi-aqi-dataset
-│
-├── data/aqi_data.csv
-├── data/delhi_wards.geojson
-├── notebooks/AtmosIntel_MVP.ipynb
-├── outputs/AtmosIntel_dashboard.html
-├── src/fetch_aqi.py
-├── priority_wards.csv(created in the colab notebook)
-├── aqi_collector.py
-└── .github/workflows/
-```
-
----
-
-# 📦 Installation
+## Setup
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/durlabhjilegend-lgtm/AtmosIntel.git
-cd AtmosIntel
+git clone https://github.com/ayush-kr-repo/atmosintel-aqi-intelligence.git
+cd atmosintel-aqi-intelligence
 ```
 
 Install dependencies:
-```bash
-pip install pandas numpy geopandas shapely scipy folium
-```
 
-Or install using requirements file:
-```
+```bash
 pip install -r requirements.txt
 ```
 
-# ▶️ How to Run the Project
+Create a local `.env` file if you want to run AQI collection locally:
 
-### 1️⃣ Open the Notebook
-
-Open **AtmosIntel_MVP.ipynb** in **Google Colab**.
-
-### 2️⃣ Run All Cells
-
-The notebook will:
-
-- Load AQI data from GitHub  
-- Display monitoring stations  
-- Perform spatial interpolation  
-- Estimate ward‑level AQI  
-- Generate advisories  
-
-### 3️⃣ Generate Dashboard
-
-The notebook exports an interactive dashboard:
-
-```
-AtmosIntel_dashboard.html
+```text
+WAQI_TOKEN=your_actual_token
 ```
 
----
+The repository includes `.env.example` as a safe template. Do not commit real API tokens.
 
-**Dashboard Capabilities**
+## How to Run
 
-The generated dashboard allows users to:
+Run the data collector:
 
-- View **real‑time AQI distribution**
-- Identify **high‑risk wards**
-- Inspect monitoring stations
-- Monitor pollution hotspots
-- Access automated advisories
-
----
-
-# 📊 Data Source
-
-AQI data is collected from urban air quality monitoring stations.
-
-The dataset includes:
-
-- Monitoring station name
-- Latitude
-- Longitude
-- AQI value
-
-Administrative boundaries are provided via:
-```
-delhi_wards.geojson
+```bash
+python src/fetch_aqi.py
 ```
 
-# 🚀 Future Improvements
+Open the notebook:
 
-Planned improvements include:
+```text
+notebooks/AtmosIntel_MVP.ipynb
+```
 
-- Real‑time pollutant monitoring (PM2.5, PM10, NO₂, SO₂)
-- Machine learning based **pollution source detection**
-- Wind‑driven pollution trajectory analysis
-- Automated alert notification systems
-- Integration with smart city command centers
-- Time-series pollution forecasting
+The notebook performs interpolation, ward-level AQI estimation, advisory generation, and dashboard export.
 
----
+Generated dashboard:
 
-# 🌱 Impact
+```text
+outputs/AtmosIntel_dashboard.html
+```
 
-AtmosIntel demonstrates how environmental data can be transformed into **actionable intelligence for urban governance**.
+## GitHub Actions
 
-Potential benefits include:
+The workflow in `.github/workflows/aqi.yml` can collect AQI data on a schedule.
 
-- Early detection of pollution hotspots  
-- Targeted mitigation strategies  
-- Improved public health awareness  
-- Data‑driven environmental policy  
+Required repository secret:
 
----
+```text
+WAQI_TOKEN
+```
 
-# 👨‍💻 Authors
+## Data Sources
 
-Developed by:
+- AQI readings: WAQI API / monitoring station data.
+- Ward boundaries: Delhi ward GeoJSON file included in `data/delhi_wards.geojson`.
 
-- **Durlabh Biswas**
-- **Ayush Kumar**
-- **Shreyan Porel**
-- **Vivyaan Ojha**
----
+## Current Limitations
 
-Explore the notebook and dashboard to see how AtmosIntel converts raw AQI data into hyper‑local pollution intelligence.
+- IDW is distance-based and does not model wind, traffic, industrial activity, or weather.
+- AQI quality depends on station availability and API response reliability.
+- The current version estimates AQI spatially but does not forecast future pollution.
+- Dashboard is exported as static HTML rather than deployed as a hosted app.
+
+## Future Improvements
+
+- Add pollutant-level analysis for PM2.5, PM10, NO2, SO2, and O3.
+- Add wind-aware pollution movement modeling.
+- Add time-series AQI forecasting.
+- Deploy dashboard publicly.
+- Add automated alert notifications.
+- Add validation against held-out monitoring stations.
+
+## Authors
+
+Built by:
+- Ayush Kumar
+- Durlabh Biswas
+- Shreyan Porel
+- Vivyaan Ojha
