@@ -2,7 +2,7 @@
 
 AtmosIntel converts sparse air-quality monitoring data into ward-level pollution intelligence using spatial interpolation and geospatial analytics.
 
-The platform estimates AQI for unsampled Delhi wards, detects pollution hotspots, generates citizen/government advisories, and exports an interactive Folium dashboard.
+The platform estimates AQI for unsampled Delhi wards, detects pollution hotspots, generates citizen/government advisories, and exports a Folium-based geospatial dashboard.
 
 ## Project Scale
 
