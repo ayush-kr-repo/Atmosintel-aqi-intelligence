@@ -63,7 +63,7 @@ Spatial interpolation requires repeated nearest-neighbor lookups. AtmosIntel use
 
 ## Project Preview
 
-Dashboard screenshots will be added after upload.
+![AQI dashboard](docs/images/aqi-dashboard.png)
 
 ## Repository Structure
 
